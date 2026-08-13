@@ -4,7 +4,7 @@ Landing page de campanha do Dr. Rodrigo Pires, ortopedista e traumatologista em 
 
 ## Publicação
 
-Todo push para `main` publica a página no GitHub Pages. A página é servida a partir de `index.html` e os ativos ficam em `img/`.
+Todo push para `main` publica a página automaticamente na Vercel, no time Pulso. A página é servida a partir de `index.html` e os ativos ficam em `img/`.
 
 ## Pendências antes de Ads
 
