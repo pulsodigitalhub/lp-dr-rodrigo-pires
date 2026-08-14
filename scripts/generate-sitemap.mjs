@@ -85,7 +85,7 @@ const base = BASE_URL.replace(/\/$/, '');
 const urls = sorted
   .map((r) => `  <url>\n    <loc>${esc(base + toUrl(r))}</loc>\n  </url>`)
   .join('\n');
-const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 
 // escreve sempre na fonte (public/ ou raiz do repo), nunca em dist/
 const outDir = fs.existsSync(path.join(ROOT, 'public')) ? path.join(ROOT, 'public') : ROOT;
