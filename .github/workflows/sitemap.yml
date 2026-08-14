@@ -1,0 +1,58 @@
+# Copiar pra .github/workflows/sitemap.yml no repo da LP.
+# Trocar __PROD_BRANCH__ pela branch de produção real (nem sempre é "main" —
+# ver AGENTS.md) e __BASE_URL__ pelo domínio de produção confirmado
+# (nunca o subdomínio *.vercel.app — ver AGENTS.md).
+# Se o repo tem build (package.json com script "build"), descomentar os
+# dois steps de build abaixo; se for HTML puro sem build, remover os dois.
+
+name: Generate sitemap.xml
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'public/sitemap.xml'
+      - 'sitemap.xml'
+
+concurrency:
+  group: sitemap-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sitemap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # - name: Instalar dependências
+      #   run: npm ci
+
+      # - name: Build (pra descobrir as rotas reais do output)
+      #   run: npm run build
+
+      - name: Gerar sitemap.xml
+        env:
+          SITEMAP_BASE_URL: "https://lp.drrodrigopires.com.br"
+        run: node scripts/generate-sitemap.mjs
+
+      - name: Commitar sitemap.xml se mudou
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "$(git status --porcelain -- '*sitemap.xml')" ]; then
+            git config user.name "sitemap-bot"
+            git config user.email "sitemap-bot@users.noreply.github.com"
+            git add -- '*sitemap.xml'
+            git commit -m "chore: atualiza sitemap.xml automaticamente"
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}" "HEAD:${GITHUB_REF_NAME}"
+          else
+            echo "sitemap.xml sem mudanças"
+          fi
