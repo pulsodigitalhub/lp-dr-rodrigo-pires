@@ -1,0 +1,115 @@
+/* Modal de agendamento (Nome + Telefone) antes do redirecionamento pro WhatsApp.
+   Usa os tokens de :root já definidos no <style> de cada página (var() com
+   fallback pra paleta navy/gold do site, caso algum dia rode isolado). */
+
+.lead-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 36, 64, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+}
+.lead-modal-backdrop[hidden] { display: none; }
+
+.lead-modal {
+  background: var(--white, #fff);
+  color: var(--ink, #212e51);
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--radius, 12px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  padding: 28px 24px 24px;
+  position: relative;
+  font-family: var(--font-sans, "Montserrat", system-ui, sans-serif);
+}
+
+.lead-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--muted, #6c7590);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.lead-modal-close:hover { background: var(--line-soft, rgba(33,46,81,.06)); }
+
+.lead-modal .kicker {
+  color: var(--gold-strong, #806331);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+.lead-modal h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: var(--navy, #212e51);
+}
+.lead-modal-intro {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: var(--muted, #6c7590);
+  line-height: 1.5;
+}
+
+.lead-modal label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft, #4a5570);
+  margin: 14px 0 6px;
+}
+.lead-modal input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line, rgba(33,46,81,.12));
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink, #212e51);
+  background: var(--paper, #f3ebde);
+}
+.lead-modal input:focus {
+  outline: 2px solid var(--gold, #d4b589);
+  outline-offset: 1px;
+}
+
+.lead-modal-error {
+  color: #b3261e;
+  font-size: 13px;
+  margin: 10px 0 0;
+  min-height: 16px;
+}
+
+.lead-modal-submit {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: var(--radius-pill, 30px);
+  background: var(--wa-green, #25d366);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: var(--shadow-cta, 0 4px 10px rgba(0,0,0,.22));
+}
+.lead-modal-submit:disabled { opacity: 0.7; cursor: default; }
+.lead-modal-submit svg { width: 18px; height: 18px; flex: none; }
+
+body.lead-modal-open { overflow: hidden; }
