@@ -74,9 +74,11 @@ function esc(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 }
 
+// cleanUrls: true no vercel.json deste repo — a Vercel serve .html sem a extensão,
+// entao o sitemap ja aponta pra URL final (sem redirect) em vez do arquivo bruto.
 function toUrl(r) {
   if (r === '/') return '/';
-  if (r.endsWith('.html')) return r;
+  if (r.endsWith('.html')) return r.slice(0, -'.html'.length);
   return `${r}/`;
 }
 
