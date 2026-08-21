@@ -125,9 +125,6 @@
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: 'lead_form_submit', form_name: 'lead_modal_rodrigo_pires' });
 
-    // abre em janela síncrona (gesto do usuário) — evita bloqueio de popup
-    // enquanto o fetch do webhook roda em segundo plano.
-    var whatsAppWindow = window.open(whatsappUrl, '_blank', 'noopener');
     window.dataLayer.push({ event: 'whatsapp_open' });
 
     fetch(WEBHOOK_URL, {
@@ -146,10 +143,10 @@
       }),
       keepalive: true
     }).catch(function () {
-      /* WhatsApp já abriu; o webhook é melhor-esforço, não bloqueia o usuário. */
+      /* navegação para o WhatsApp já está em andamento; o webhook é melhor-esforço, não bloqueia o usuário. */
     });
 
-    if (!whatsAppWindow) window.location.href = whatsappUrl;
+    window.location.href = whatsappUrl;
 
     form.reset();
     closeModal();
