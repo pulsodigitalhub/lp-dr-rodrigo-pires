@@ -146,6 +146,12 @@ function checarBridgePage({ arquivo, html }) {
   }
 }
 
+let avisoPoliticaPrivacidadeNoBundleEmitido = false;
+
+function mencionaPoliticaPrivacidade(texto) {
+  return /politica[s]?[-_]?de[-_]?privacidade|politica[s]?\s+de\s+privacidade|privacy[-_]?policy/i.test(texto);
+}
+
 function checarPoliticaPrivacidade({ arquivo, html }) {
   const anchorRegex = /<a\b[^>]*>/gi;
   let match;
@@ -176,7 +182,20 @@ function checarPoliticaPrivacidade({ arquivo, html }) {
     }
   }
 
-  if (!encontrou) {
+  if (!encontrou && mencionaPoliticaPrivacidade(TEXTO_DOS_BUNDLES)) {
+    if (!avisoPoliticaPrivacidadeNoBundleEmitido) {
+      addAviso({
+        regra: 'A5',
+        arquivo: arquivo.rel,
+        linha: 1,
+        descricao: 'Link de politica de privacidade so existe no bundle JS (SPA) — nao verificavel estaticamente',
+        trecho: 'confirmar no navegador que o link aparece na pagina renderizada',
+        politica: 'Data collection and use',
+        url: 'https://support.google.com/adspolicy/answer/6020956',
+      });
+      avisoPoliticaPrivacidadeNoBundleEmitido = true;
+    }
+  } else if (!encontrou) {
     addErro({
       regra: 'B5',
       arquivo: arquivo.rel,
@@ -334,6 +353,10 @@ function checarSitemap() {
 }
 
 const arquivos = findFiles(SCAN_DIR, SCAN_DIR);
+const TEXTO_DOS_BUNDLES = arquivos
+  .filter((a) => a.rel.endsWith('.js') || a.rel.endsWith('.mjs'))
+  .map((a) => { try { return fs.readFileSync(a.abs, 'utf8'); } catch { return ''; } })
+  .join('\n');
 const arquivosAbsolutos = new Set(arquivos.map((arquivo) => arquivo.abs));
 const htmls = arquivos.filter((arquivo) => path.extname(arquivo.abs).toLowerCase() === '.html');
 const anchorRegex = /<a\b[^>]*>/gi;
