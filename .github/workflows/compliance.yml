@@ -1,0 +1,35 @@
+# Este arquivo é um template: copie-o para .github/workflows/compliance.yml no repo da LP do cliente e substitua https://lp.drrodrigopires.com.br (domínio de produção real, com https) e main (branch de produção do repo, geralmente main) ao copiar.
+
+name: Compliance Google Ads
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: compliance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # Descomente se o repo tiver package.json/build.
+      # - name: Instalar dependências
+      #   run: npm ci
+      # Descomente se o repo tiver package.json/build.
+      # - name: Build (pra checar o output real que vai pro ar)
+      #   run: npm run build
+      - name: Checar compliance Google Ads
+        env:
+          COMPLIANCE_BASE_URL: "https://lp.drrodrigopires.com.br"
+        run: node scripts/check-google-ads-compliance.mjs
+
+# O job falha (exit 1) em violações bloqueantes e impede o merge/publicação.
