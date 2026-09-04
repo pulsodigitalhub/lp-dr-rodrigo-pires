@@ -188,6 +188,12 @@ function mencionaPoliticaPrivacidade(texto) {
 }
 
 function checarPoliticaPrivacidade({ arquivo, html }) {
+  if (/politica[s]?[-_]?de[-_]?privacidade|privacy[-_]?policy/i.test(arquivo.rel)) return;
+
+  // Pagina sem coleta e sem rastreamento nao esta sujeita a esta exigencia.
+  const COLETA = /<form\b|<input\b|googletagmanager\.com|gtag\s*\(|fbq\s*\(|clarity\s*\(|hotjar|analytics\.js/i;
+  if (!COLETA.test(html)) return;
+
   const anchorRegex = /<a\b[^>]*>/gi;
   let match;
   let encontrou = false;
