@@ -44,6 +44,21 @@ const ALLOWLIST = new Set([
   'www.doctoralia.com.br',
 ].map((host) => host.replace(/^www\./i, '').toLowerCase()));
 
+const DOMINIOS_EXTRA = new Set(
+  (process.env.COMPLIANCE_EXTRA_DOMAINS || '')
+    .split(',')
+    .map((d) => d.trim().replace(/^https?:\/\//i, '').replace(/^www\./i, '').toLowerCase())
+    .filter(Boolean)
+);
+
+const FORMA_REDIRECIONADOR = /\/(go|r|l|link|redirect|out|track)\//i;
+const TEXTO_DE_CTA = /agend|whats|fale|contato|conversar|confirmar|marcar|chamar|solicitar/i;
+
+function pareceCTA(tagAncora) {
+  if (/data-lead-open/i.test(tagAncora)) return true;
+  return TEXTO_DE_CTA.test(tagAncora);
+}
+
 function findFiles(dir, base) {
   const files = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -104,14 +119,24 @@ function checarHref({ href, indice, match, arquivo, arquivosAbsolutos, html }) {
   if (/^https?:\/\//i.test(href)) {
     try {
       const host = new URL(href).hostname.replace(/^www\./i, '').toLowerCase();
-      if (host !== baseHost && !ALLOWLIST.has(host)) {
-        addErro({
-          regra: 'B1',
-          ...contexto,
-          descricao: 'Redirecionador/dominio externo em href de CTA',
-          politica: 'Circumventing systems / Destination mismatch',
-          url: 'https://support.google.com/adspolicy/answer/15938075',
-        });
+      if (host !== baseHost && !ALLOWLIST.has(host) && !DOMINIOS_EXTRA.has(host)) {
+        if (FORMA_REDIRECIONADOR.test(new URL(href).pathname) || pareceCTA(match)) {
+          addErro({
+            regra: 'B1',
+            ...contexto,
+            descricao: 'Link externo com forma de redirecionador ou CTA fora do dominio anunciado',
+            politica: 'Circumventing systems / Destination mismatch',
+            url: 'https://support.google.com/adspolicy/answer/15938075',
+          });
+        } else {
+          addAviso({
+            regra: 'A6',
+            ...contexto,
+            descricao: 'Link externo (referencia, nao CTA) — conferir se e intencional',
+            politica: 'Circumventing systems / Destination mismatch',
+            url: 'https://support.google.com/adspolicy/answer/15938075',
+          });
+        }
       }
     } catch {
       // Uma URL absoluta inválida será tratada por outras validações da página.
@@ -122,13 +147,23 @@ function checarHref({ href, indice, match, arquivo, arquivosAbsolutos, html }) {
   if (/^(#|mailto:|tel:|javascript:|data:|\/\/)/i.test(href)) return;
   const variantes = caminhosInternosPossiveis(href, arquivo);
   if (!variantes.some((caminho) => arquivosAbsolutos.has(caminho))) {
-    addErro({
-      regra: 'B2',
-      ...contexto,
-      descricao: 'Link interno aponta para arquivo inexistente no output',
-      politica: 'Destination not working',
-      url: 'https://support.google.com/adspolicy/answer/6368661',
-    });
+    if (/(^|\/)\.\.\//.test(href) || href.startsWith('../')) {
+      addAviso({
+        regra: 'A7',
+        ...contexto,
+        descricao: 'Link relativo com ../ depende da barra final da URL; usar caminho absoluto',
+        politica: 'Destination not working',
+        url: 'https://support.google.com/adspolicy/answer/6368661',
+      });
+    } else {
+      addErro({
+        regra: 'B2',
+        ...contexto,
+        descricao: 'Link interno aponta para arquivo inexistente no output',
+        politica: 'Destination not working',
+        url: 'https://support.google.com/adspolicy/answer/6368661',
+      });
+    }
   }
 }
 
