@@ -1,6 +1,6 @@
 # Copiar pra .github/workflows/sitemap.yml no repo da LP.
-# Trocar __PROD_BRANCH__ pela branch de produção real (nem sempre é "main" —
-# ver AGENTS.md) e __BASE_URL__ pelo domínio de produção confirmado
+# Trocar main pela branch de produção real (nem sempre é "main" —
+# ver AGENTS.md) e https://lp.drrodrigopires.com.br pelo domínio de produção confirmado
 # (nunca o subdomínio *.vercel.app — ver AGENTS.md).
 # Se o repo tem build (package.json com script "build"), descomentar os
 # dois steps de build abaixo; se for HTML puro sem build, remover os dois.
