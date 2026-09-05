@@ -33,6 +33,21 @@ try {
 const ROOT = process.cwd();
 const EXCLUDE = new Set(['node_modules', 'dist', '.git', 'src', '.github', '.vercel', '.next']);
 
+// Arquivos de verificacao de propriedade (Search Console, Bing, Yandex, Pinterest)
+// usam extensao .html mas sao uma linha de texto puro, sem marcacao. Entram no
+// site e por isso apareciam no sitemap como se fossem pagina — o que contradiz
+// "o sitemap contem apenas paginas de conteudo" e polui o relatorio de indexacao.
+// O teste e estrutural, nao lista de nomes: sem <html> nem <head>, nao e pagina.
+// Assim vale pra qualquer arquivo de verificacao futuro, de qualquer servico.
+function ehPaginaDeConteudo(arquivo) {
+  try {
+    const inicio = fs.readFileSync(arquivo, 'utf8').slice(0, 4096).toLowerCase();
+    return inicio.includes('<html') || inicio.includes('<head');
+  } catch {
+    return false;
+  }
+}
+
 function findPages(dir, base) {
   const routes = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -42,6 +57,10 @@ function findPages(dir, base) {
     } else if (entry.name === 'index.html') {
       routes.push(base || '/');
     } else if (entry.name.endsWith('.html')) {
+      if (!ehPaginaDeConteudo(path.join(dir, entry.name))) {
+        console.log(`  (ignorado, nao e pagina: ${base}/${entry.name})`);
+        continue;
+      }
       routes.push(`${base}/${entry.name}`);
     }
   }
@@ -59,7 +78,8 @@ if (fs.existsSync(distDir)) {
     if (entry.isFile() && entry.name === 'index.html') {
       routes.add('/');
     } else if (entry.isFile() && entry.name.endsWith('.html')) {
-      routes.add(`/${entry.name}`);
+      if (ehPaginaDeConteudo(path.join(ROOT, entry.name))) routes.add(`/${entry.name}`);
+      else console.log(`  (ignorado, nao e pagina: /${entry.name})`);
     } else if (entry.isDirectory() && !EXCLUDE.has(entry.name)) {
       // conteúdo de public/ é servido a partir da raiz do site (padrão Vite) — sem prefixo /public
       const prefix = entry.name === 'public' ? '' : `/${entry.name}`;
