@@ -28,7 +28,7 @@
       personalization_storage: 'denied',
       security_storage: 'granted',
       wait_for_update: 500
-    });
+    });gtag('set','url_passthrough',true);
     try {
       var savedConsent = localStorage.getItem('dr_rodrigo_pires_consent_v1');
       if (savedConsent) gtag('consent', 'update', JSON.parse(savedConsent));
