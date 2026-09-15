@@ -20,20 +20,15 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('consent', 'default', {
-      ad_storage: 'denied',
-      ad_user_data: 'denied',
-      ad_personalization: 'denied',
-      analytics_storage: 'denied',
+      ad_storage: 'granted',
+      ad_user_data: 'granted',
+      ad_personalization: 'granted',
+      analytics_storage: 'granted',
       functionality_storage: 'granted',
-      personalization_storage: 'denied',
-      security_storage: 'granted',
-      wait_for_update: 500
+      personalization_storage: 'granted',
+      security_storage: 'granted'
     });gtag('set','url_passthrough',true);
-    try {
-      var savedConsent = localStorage.getItem('dr_rodrigo_pires_consent_v1');
-      if (savedConsent) gtag('consent', 'update', JSON.parse(savedConsent));
-    } catch (error) {}
-  </script>
+</script>
 
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -798,47 +793,7 @@
     }
     .preview-banner strong { color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-right: 10px; }
 
-    /* Consentimento LGPD */
-    .consent-banner {
-      position: fixed;
-      z-index: 100;
-      right: 20px;
-      bottom: 20px;
-      left: 20px;
-      max-width: 760px;
-      margin-inline: auto;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      color: var(--white);
-      background: var(--navy-dark);
-      border: 1px solid rgba(212, 181, 137, 0.38);
-      border-radius: var(--radius);
-      box-shadow: 0 16px 40px rgba(26, 36, 64, 0.28);
-    }
-    .consent-banner[hidden] { display: none; }
-    .consent-copy { max-width: 460px; }
-    .consent-copy strong { display: block; margin-bottom: 4px; font-size: 14px; }
-    .consent-copy p { margin: 0; color: rgba(255,255,255,0.78); font-size: 12px; line-height: 1.5; }
-    .consent-copy a { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
-    .consent-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-    .consent-actions button {
-      min-height: 42px;
-      padding: 0 14px;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(255,255,255,0.62);
-      font: inherit;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .consent-essential { color: var(--white); background: transparent; }
-    .consent-accept { color: var(--navy-dark); background: var(--gold); border-color: var(--gold) !important; }
-    .consent-actions button:focus-visible { outline: 3px solid var(--white); outline-offset: 3px; }
-
-    /* Responsivo */
+/* Responsivo */
     @media (max-width: 960px) {
       header nav { display: none; }
       .hero-inner { grid-template-columns: 1fr; gap: 32px; padding: 32px 0 0; }
@@ -854,9 +809,7 @@
       .final { padding: 56px 20px; margin-top: 48px; }
       .footer-inner { grid-template-columns: 1fr; gap: 28px; }
       .footer-bottom { flex-direction: column; }
-      .consent-banner { align-items: flex-start; flex-direction: column; }
-      .consent-actions { width: 100%; justify-content: flex-start; }
-    }
+}
 
     @media (max-width: 640px) {
       :root {
@@ -880,9 +833,7 @@
       .hero-actions .btn { width: 100%; justify-content: center; }
       .convenios-list { grid-template-columns: repeat(2, 1fr); }
       .brand img { height: 46px; }
-      .consent-banner { right: 12px; bottom: 12px; left: 12px; padding: 16px; }
-      .consent-actions button { flex: 1 1 100%; width: 100%; }
-    }
+}
   </style>
   <link rel="stylesheet" href="../assets/lead-modal.css" />
   <link rel="stylesheet" href="../assets/whatsapp-fixo.css" />
@@ -893,18 +844,7 @@
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
 
-  <section id="consent-banner" class="consent-banner" aria-labelledby="consent-title" role="region">
-    <div class="consent-copy">
-      <strong id="consent-title">Sua privacidade</strong>
-      <p>Usamos cookies essenciais para o funcionamento da página. Com sua autorização, também usamos cookies de medição e publicidade para melhorar a comunicação. Consulte a <a href="/politica-de-privacidade">Política de Privacidade</a>.</p>
-    </div>
-    <div class="consent-actions">
-      <button class="consent-essential" type="button" data-consent-choice="essential">Usar apenas essenciais</button>
-      <button class="consent-accept" type="button" data-consent-choice="all">Aceitar todos</button>
-    </div>
-  </section>
-
-  <header id="topo">
+<header id="topo">
     <div class="header-inner">
       <a class="brand" href="#topo" aria-label="Dr. Rodrigo Pires · Ortopedia e Medicina da Dor">
         <img src="../img/logo-rodrigo-pires-250.webp" width="250" height="136" alt="Dr. Rodrigo Pires · Ortopedia e Medicina da Dor" />
@@ -1298,56 +1238,9 @@
       window.scrollTo(0, 0);
     });
 
-    (function() {
-      var consentKey = 'dr_rodrigo_pires_consent_v1';
-      var banner = document.getElementById('consent-banner');
-
-      function setConsent(choice) {
-        var consent = choice === 'all'
-          ? {
-              ad_storage: 'granted',
-              ad_user_data: 'granted',
-              ad_personalization: 'granted',
-              analytics_storage: 'granted',
-              functionality_storage: 'granted',
-              personalization_storage: 'granted',
-              security_storage: 'granted'
-            }
-          : {
-              ad_storage: 'denied',
-              ad_user_data: 'denied',
-              ad_personalization: 'denied',
-              analytics_storage: 'denied',
-              functionality_storage: 'granted',
-              personalization_storage: 'denied',
-              security_storage: 'granted'
-            };
-
-        gtag('consent', 'update', consent);
-        dataLayer.push({ event: 'consent_choice', consent_choice: choice });
-        try { localStorage.setItem(consentKey, JSON.stringify(consent)); } catch (error) {}
-        banner.hidden = true;
-      }
-
-      window.reopenConsent = function() {
-        banner.hidden = false;
-        banner.querySelector('[data-consent-choice="essential"]').focus();
-      };
-
-      try {
-        if (localStorage.getItem(consentKey)) banner.hidden = true;
-      } catch (error) {}
-
-      if (window.location.hash === '#consentimento') window.reopenConsent();
-
-      banner.querySelectorAll('[data-consent-choice]').forEach(function(button) {
-        button.addEventListener('click', function() { setConsent(button.dataset.consentChoice); });
-      });
-    })();
-  </script>
+</script>
 
   <script src="../assets/whatsapp-fixo.js" defer></script>
   <script src="../assets/lead-modal.js" defer></script>
-<script src="/consentimento.js" defer data-chave="dr_rodrigo_pires_consent_v1"></script>
 </body>
 </html>
