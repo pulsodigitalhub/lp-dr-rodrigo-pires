@@ -8,11 +8,12 @@ const outDir = join(root, 'variacoes');
 mkdirSync(outDir, { recursive: true });
 
 const locations = {
-  'aguas-claras': { label: 'Águas Claras', clinic: 'Clindor Ortopedia', address: 'Águas Claras, DF. Endereço completo e agenda confirmados pelo WhatsApp.', map: 'Clindor+Ortopedia+Águas+Claras+DF' },
-  'asa-sul': { label: 'Asa Sul', clinic: 'Clínica CEHD', address: 'Asa Sul, Brasília, DF. Endereço completo e agenda confirmados pelo WhatsApp.', map: 'Clínica+CEHD+Asa+Sul+Brasília+DF' },
-  'jardim-botanico': { label: 'Jardim Botânico', clinic: 'Clínica CEHD', address: 'Jardim Botânico, Brasília, DF. Endereço completo e agenda confirmados pelo WhatsApp.', map: 'Clínica+CEHD+Jardim+Botânico+Brasília+DF' },
+  'aguas-claras': { label: 'Águas Claras', clinic: 'Clindor Ortopedia', address: 'Quadra 104, Loja 27, Edifício Real Splendor, Águas Claras, Brasília, DF.', map: 'Clindor+Ortopedia+Águas+Claras+DF' },
+  'asa-sul': { label: 'Asa Sul', clinic: 'CEHD', address: 'SGAS 614, Edifício Vitrium, sala 80, Asa Sul, Brasília, DF.', map: 'CEHD+Centro+Especializado+em+Hipermobilidade+e+Dor+Brasília' },
+  'jardim-botanico': { label: 'Jardim Botânico', clinic: 'CEHD', address: 'SGAS 614, Edifício Vitrium, sala 80, Asa Sul, Brasília, DF. Atende pacientes do Jardim Botânico.', map: 'CEHD+Centro+Especializado+em+Hipermobilidade+e+Dor+Brasília' },
   'asa-norte': { label: 'Asa Norte', clinic: 'Neurospine', address: 'Instituto de Neurocirurgia, SGAN 605, Conjunto A, Asa Norte, Brasília, DF.', map: 'Neurospine+Instituto+de+Neurocirurgia+Brasília+Asa+Norte' },
-  'taguatinga-norte': { label: 'Taguatinga Norte', clinic: 'JK Ortopedia', address: 'Em frente ao Shopping JK, Avenida Comercial Norte, Taguatinga Norte, Brasília, DF.', map: 'JK+Ortopedia+Taguatinga+Norte+Brasília' }
+  'taguatinga-norte': { label: 'Taguatinga Norte', clinic: 'JK Ortopedia', address: 'Em frente ao Shopping JK, Avenida Comercial Norte, Taguatinga Norte, Brasília, DF.', map: 'JK+Ortopedia+Taguatinga+Norte+Brasília' },
+  'ceilandia': { label: 'Ceilândia', clinic: 'JK Ortopedia', address: 'Em frente ao Shopping JK, Avenida Comercial Norte, Taguatinga Norte, Brasília, DF. Unidade mais próxima de quem vem de Ceilândia.', map: 'JK+Ortopedia+Taguatinga+Norte+Brasília' }
 };
 
 const regions = {
