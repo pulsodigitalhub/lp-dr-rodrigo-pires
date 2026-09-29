@@ -8,7 +8,7 @@ try {
     client: 'dr-rodrigo-pires',
     prefix: 'RP',
     doctor: 'o Dr. Rodrigo Pires',
-    booking: 'uma avaliação',
+    booking: 'uma consulta',
     onClick: function (source) {
       window.dataLayer = window.dataLayer || [];
       /* A conversão do Google Ads no GTM-P3TMD42G dispara em lead_form_submit.
