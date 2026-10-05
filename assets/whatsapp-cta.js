@@ -9,14 +9,16 @@ try {
     prefix: 'RP',
     doctor: 'o Dr. Rodrigo Pires',
     booking: 'uma consulta',
-    onClick: function (source) {
+    onClick: function (source, anchor, eventId) {
       window.dataLayer = window.dataLayer || [];
       /* A conversão do Google Ads no GTM-P3TMD42G dispara em lead_form_submit.
          O evento vinha do formulário; sem formulário, o clique no botão é a
          conversão. Nome e form_name ficam iguais para o gatilho continuar
-         valendo. Só a posição do botão: nada de nome ou telefone. */
-      window.dataLayer.push({ event: 'lead_form_submit', form_name: 'lead_modal_rodrigo_pires', cta_location: source });
-      window.dataLayer.push({ event: 'whatsapp_open', cta_location: source });
+         valendo. Só a posição do botão: nada de nome ou telefone. O event_id é
+         o mesmo enviado ao Intelligence, para o pixel da Meta deduplicar com a
+         API de conversões. */
+      window.dataLayer.push({ event: 'lead_form_submit', form_name: 'lead_modal_rodrigo_pires', cta_location: source, event_id: eventId });
+      window.dataLayer.push({ event: 'whatsapp_open', cta_location: source, event_id: eventId });
     }
   });
 } catch (error) {

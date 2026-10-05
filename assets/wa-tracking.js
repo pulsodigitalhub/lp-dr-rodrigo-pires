@@ -3,7 +3,7 @@
 //
 // O que faz:
 //   1. Na chegada, guarda os identificadores de campanha da URL (gclid, gbraid,
-//      wbraid, fbclid, utm_*) no navegador do visitante, junto com um codigo
+//      wbraid, fbclid, gad_source, gad_campaignid, utm_*) no navegador do visitante, junto com um codigo
 //      curto da visita (ex.: MC-7K3QF9). Assim o clique continua atribuido
 //      mesmo que a pessoa troque de pagina ou volte outro dia.
 //   2. Em todo link de WhatsApp da pagina, escreve uma mensagem curta com o
@@ -12,7 +12,10 @@
 //      chegar ao Intelligence, a frase ainda permite saber de onde a pessoa
 //      veio. Nenhuma delas e igual a do site institucional.
 //   3. No clique, avisa o Intelligence em segundo plano (sendBeacon) e deixa o
-//      navegador abrir o wa.me direto. Nenhum redirecionamento por dominio
+//      navegador abrir o wa.me direto. O aviso leva tambem os cookies de anuncio
+//      que a tag do Google e o pixel da Meta deixam no navegador (_gcl_aw,
+//      _gcl_gb, _fbp, _fbc), o fbc da visita e um event_id unico do clique, que
+//      a pagina repassa ao pixel para a Meta deduplicar pixel e API de conversoes. Nenhum redirecionamento por dominio
 //      nosso: pagina-ponte viola a politica do Google Ads.
 //
 // O Intelligence casa o codigo da primeira mensagem com o clique e atribui a
@@ -29,16 +32,21 @@
 //     prefix: 'FT',                 // 2 a 6 letras/numeros, unico por cliente
 //     doctor: 'o Dr. Fulano de Tal', // com artigo: "o Dr.", "a Dra."
 //     booking: 'uma avaliação',      // o que a pessoa quer agendar
-//     onClick: (source) => {},       // opcional: evento proprio da pagina (GTM)
+//     onClick: (source, anchor, eventId) => {}, // opcional: evento proprio da pagina (GTM);
+//                                    // eventId e o mesmo enviado ao Intelligence
 //   })
 
 const DEFAULT_ENDPOINT = 'https://intelligence.calil.ia.br/v1/track/whatsapp-click/'
 const STORAGE_KEY = 'pulso_wa_attr'
 const TTL_MS = 90 * 24 * 60 * 60 * 1000
 const CAMPAIGN_KEYS = [
-  'gclid', 'gbraid', 'wbraid', 'fbclid',
-  'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+  'gclid', 'gbraid', 'wbraid', 'fbclid', 'gad_source', 'gad_campaignid',
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
 ]
+// Cookies de anuncio, lidos no clique. Valem quando a pessoa volta sem o
+// identificador na URL. So existem se a pagina tem a tag do Google ou o pixel
+// da Meta com consentimento.
+const AD_COOKIES = { _gcl_aw: 'gcl_aw', _gcl_gb: 'gcl_gb', _fbp: 'fbp', _fbc: 'fbc' }
 // Sem 0/O, 1/I/L: o codigo pode ser lido em voz alta pela secretaria.
 const REF_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'
 const REF_LENGTH = 6
@@ -64,6 +72,40 @@ function secureRandom(max) {
   } catch {
     return Math.floor(Math.random() * max)
   }
+}
+
+export function parseAdCookies(cookieString) {
+  const cookies = {}
+  for (const part of (cookieString || '').split(';')) {
+    const index = part.indexOf('=')
+    if (index < 0) continue
+    const name = AD_COOKIES[part.slice(0, index).trim()]
+    let value = part.slice(index + 1).trim()
+    try { value = decodeURIComponent(value) } catch {}
+    if (name && value) cookies[name] = value.slice(0, MAX_FIELD)
+  }
+  return cookies
+}
+
+// Formato da Meta para o clique de anuncio: fb.1.<chegada em ms>.<fbclid>. O
+// cookie _fbc do pixel, quando existe, vale mais: e o que o pixel ja mandou.
+export function fbcForVisit(visit) {
+  const fbclid = visit && visit.campaign && visit.campaign.fbclid
+  return fbclid ? `fb.1.${visit.ts}.${fbclid}`.slice(0, MAX_FIELD) : ''
+}
+
+export function newEventId(random = secureRandom) {
+  try {
+    if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') return globalThis.crypto.randomUUID()
+  } catch {}
+  const hex = '0123456789abcdef'
+  let id = ''
+  for (let i = 0; i < 32; i += 1) {
+    const digit = i === 12 ? 4 : i === 16 ? 8 + random(4) : random(16)
+    id += hex[digit]
+    if (i === 7 || i === 11 || i === 15 || i === 19) id += '-'
+  }
+  return id
 }
 
 export function campaignFromSearch(search) {
@@ -153,11 +195,14 @@ export function referrerWithoutQuery(referrer) {
   }
 }
 
-export function clickPayload({ visit, source, pageUrl, userAgent }) {
+export function clickPayload({ visit, source, pageUrl, userAgent, cookies = {}, eventId = '' }) {
   const payload = {
     ref: visit.ref,
     pagina: source,
+    event_id: eventId,
     ...visit.campaign,
+    ...cookies,
+    fbc: cookies.fbc || fbcForVisit(visit),
     landing_page_url: (pageUrl || '').slice(0, MAX_URL),
     referrer_url: visit.referrer,
     user_agent: (userAgent || '').slice(0, MAX_USER_AGENT),
@@ -228,16 +273,23 @@ export function initWhatsappTracking(config) {
   }
 
   let lastSentAt = 0
+  let lastEventId = ''
+  // Devolve o event_id do clique; um clique repetido em menos de 1 s e o mesmo
+  // clique e devolve o mesmo id.
   const sendClick = (source) => {
     const now = Date.now()
-    if (now - lastSentAt < DUPLICATE_CLICK_MS) return
+    if (now - lastSentAt < DUPLICATE_CLICK_MS) return lastEventId
     lastSentAt = now
+    lastEventId = newEventId()
     send(endpoint, clickPayload({
       visit,
       source: source || 'lp',
       pageUrl: window.location.href,
       userAgent: navigator.userAgent,
+      cookies: parseAdCookies(document.cookie),
+      eventId: lastEventId,
     }))
+    return lastEventId
   }
 
   // Rastreamento nunca pode atrasar nem impedir a ida para o WhatsApp: todo
@@ -259,8 +311,8 @@ export function initWhatsappTracking(config) {
       const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null
       if (!anchor || !isWhatsappUrl(anchor.href)) return
       decorate(anchor)
-      sendClick(anchor.dataset.cta)
-      if (typeof config.onClick === 'function') config.onClick(anchor.dataset.cta || 'lp', anchor)
+      const eventId = sendClick(anchor.dataset.cta)
+      if (typeof config.onClick === 'function') config.onClick(anchor.dataset.cta || 'lp', anchor, eventId)
     } catch {}
   }, true)
 
